@@ -27,7 +27,7 @@ atexit.register(cleanup_on_exit)
 
 # ============= Page Configuration =============
 st.set_page_config(
-    page_title="Legal Document Q&A",
+    page_title="Legal Doc Q&A",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -113,7 +113,7 @@ st.markdown("""
 # ============= Main Application =============
 with st.container():
     # Title
-    st.title("⚖️ Legal Document Q&A")
+    st.title("⚖️ Legal Doc Q&A")
     
     # Status Bar
     status_col1, status_col2 = st.columns([3, 1])
@@ -161,11 +161,11 @@ with st.container():
                 st.info("📝 You can now ask questions about the document")
 
     # Chat Interface
-    st.markdown("### 💬 Chat")
+    st.markdown('<div style="margin-bottom: -25px; margin-top: -10px;">### 💬 Chat</div>', unsafe_allow_html=True)
     
     # Chat History Display
     with st.container():
-        st.markdown('<div class="main-content">', unsafe_allow_html=True)
+        st.markdown('<div class="main-content" style="margin-top: -10px; padding-top: 0;">', unsafe_allow_html=True)
         
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
