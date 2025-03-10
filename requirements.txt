@@ -1,0 +1,6 @@
+langchain-text-splitters>=0.0.1
+langchain-ollama>=0.0.1
+langchain-community>=0.0.10
+faiss-cpu>=1.7.4
+PyPDF2>=3.0.0
+streamlit>=1.32.0 

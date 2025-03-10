@@ -1,0 +1,44 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+
+
+# PDF files and uploads directory
+pdfs/
+uploads/
+
+# Vector database and model files
+vectorstore/
+models/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/ 
