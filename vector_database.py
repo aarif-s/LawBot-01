@@ -35,7 +35,7 @@ def refresh_vectorstore():
     print(f"📌 Total document chunks created: {len(chunks)}")
 
     # Create embeddings & build FAISS
-    embeddings = OllamaEmbeddings(model="deepseek-r1:1.5b")
+    embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
     faiss_db_local = FAISS.from_documents(chunks, embeddings)
 
     # Save FAISS index
@@ -118,7 +118,7 @@ if os.path.exists("vectorstore/db_faiss"):
     try:
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
-            OllamaEmbeddings(model="deepseek-r1:1.5b"),
+            OllamaEmbeddings(model="nomic-embed-text:latest"),
             allow_dangerous_deserialization=True
         )
         print("✅ Loaded existing FAISS index...")
