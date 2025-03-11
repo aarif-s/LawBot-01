@@ -2,11 +2,21 @@ from langchain_groq import ChatGroq
 from vector_database import faiss_db
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
+# Initialize Groq client
+groq_api_key = os.getenv("GROQ_API_KEY")
+if not groq_api_key:
+    raise ValueError("Please set GROQ_API_KEY environment variable")
+
 # ✅ Load AI model
-llm_model = ChatGroq(model="deepseek-r1-distill-llama-70b")
+llm_model = ChatGroq(
+    temperature=0.7,
+    model_name="llama2-70b-4096",
+    groq_api_key=groq_api_key
+)
 
 # ✅ Custom Legal Prompt Template
 custom_prompt_template = ChatPromptTemplate.from_template(

@@ -1,8 +1,17 @@
 import os
+from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_ollama import OllamaEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
+
+# Load environment variables
+load_dotenv()
+
+# Initialize Groq client
+groq_api_key = os.getenv("GROQ_API_KEY")
+if not groq_api_key:
+    raise ValueError("Please set GROQ_API_KEY environment variable")
 
 def process_uploaded_pdf(uploaded_file):
     """Save uploaded PDF and return its path."""
@@ -34,11 +43,19 @@ def refresh_vectorstore():
     chunks = text_splitter.split_documents(documents)
     print(f"📌 Total document chunks created: {len(chunks)}")
 
-    # Create embeddings & build FAISS
-    embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
+    # Create embeddings using OpenAI compatible API
+    embeddings = OpenAIEmbeddings(
+        openai_api_key=groq_api_key,
+        openai_api_base="https://api.groq.com/openai/v1"
+    )
+    
     faiss_db_local = FAISS.from_documents(chunks, embeddings)
 
     # Save FAISS index
+    if not os.path.exists("vectorstore"):
+        os.makedirs("vectorstore")
+    if not os.path.exists("vectorstore/db_faiss"):
+        os.makedirs("vectorstore/db_faiss")
     faiss_db_local.save_local("vectorstore/db_faiss")
     print("✅ FAISS vectorstore successfully rebuilt.")
     
@@ -116,9 +133,13 @@ def cleanup_pdf(pdf_path):
 if os.path.exists("vectorstore/db_faiss"):
     print("📥 Loading existing FAISS index...")
     try:
+        embeddings = OpenAIEmbeddings(
+            openai_api_key=groq_api_key,
+            openai_api_base="https://api.groq.com/openai/v1"
+        )
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
-            OllamaEmbeddings(model="nomic-embed-text:latest"),
+            embeddings,
             allow_dangerous_deserialization=True
         )
         print("✅ Loaded existing FAISS index...")
