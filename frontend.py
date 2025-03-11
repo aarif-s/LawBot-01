@@ -45,7 +45,7 @@ st.markdown("""
     
     /* Title styling */
     .stTitle {
-        font-size: 1.3rem !important;
+        font-size: 1.2rem !important;
         margin: 0.3rem 0 !important;
     }
     
