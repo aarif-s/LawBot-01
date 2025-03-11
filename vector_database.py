@@ -1,12 +1,17 @@
 import os
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import AverageEmbeddings
+from langchain_groq import GroqEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 
 # Load environment variables
 load_dotenv()
+
+# Initialize Groq client
+groq_api_key = os.getenv("GROQ_API_KEY")
+if not groq_api_key:
+    raise ValueError("Please set GROQ_API_KEY environment variable")
 
 def process_uploaded_pdf(uploaded_file):
     """Save uploaded PDF and return its path."""
@@ -43,8 +48,11 @@ def refresh_vectorstore():
     chunks = text_splitter.split_documents(documents)
     print(f"📌 Total document chunks created: {len(chunks)}")
     
-    # Create embeddings using Average Embeddings
-    embeddings = AverageEmbeddings()
+    # Create embeddings using Groq
+    embeddings = GroqEmbeddings(
+        groq_api_key=groq_api_key,
+        model_name="llama2-70b-4096"
+    )
     faiss_db_local = FAISS.from_documents(chunks, embeddings)
 
     # Save FAISS index
@@ -129,7 +137,10 @@ def cleanup_pdf(pdf_path):
 if os.path.exists("vectorstore/db_faiss"):
     print("📥 Loading existing FAISS index...")
     try:
-        embeddings = AverageEmbeddings()
+        embeddings = GroqEmbeddings(
+            groq_api_key=groq_api_key,
+            model_name="llama2-70b-4096"
+        )
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
             embeddings,
