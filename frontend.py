@@ -27,7 +27,7 @@ atexit.register(cleanup_on_exit)
 
 # ============= Page Configuration =============
 st.set_page_config(
-    page_title="Legal Doc Q&A",
+    page_title="LawGenie Sonu",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -45,7 +45,7 @@ st.markdown("""
     
     /* Title styling */
     .stTitle {
-        font-size: 1.5rem !important;
+        font-size: 1.3rem !important;
         margin: 0.3rem 0 !important;
     }
     
@@ -83,7 +83,7 @@ st.markdown("""
     
     /* Content spacing */
     .main-content {
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
     
     /* Alert boxes */
@@ -113,7 +113,7 @@ st.markdown("""
 # ============= Main Application =============
 with st.container():
     # Title
-    st.title("⚖️ Legal Doc Q&A")
+    st.title("⚖️ LawGenie Sonu")
     
     # Status Bar
     status_col1, status_col2 = st.columns([3, 1])
