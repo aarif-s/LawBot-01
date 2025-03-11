@@ -1,42 +1,12 @@
 import os
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
-import tiktoken
-import openai
 
 # Load environment variables
 load_dotenv()
-
-# Initialize Groq client
-groq_api_key = os.getenv("GROQ_API_KEY")
-if not groq_api_key:
-    raise ValueError("Please set GROQ_API_KEY environment variable")
-
-# Configure OpenAI client for Groq
-openai.api_key = groq_api_key
-openai.api_base = "https://api.groq.com/openai/v1"
-
-def get_embeddings(texts):
-    """Get embeddings for a list of texts using Groq API."""
-    try:
-        # Create headers with Groq API key
-        headers = {
-            "Authorization": f"Bearer {groq_api_key}"
-        }
-        
-        # Make request to Groq API
-        response = openai.embeddings.create(
-            model="text-embedding-ada-002",
-            input=texts,
-            headers=headers
-        )
-        return [data.embedding for data in response.data]
-    except Exception as e:
-        print(f"Error getting embeddings: {e}")
-        raise
 
 def process_uploaded_pdf(uploaded_file):
     """Save uploaded PDF and return its path."""
@@ -72,30 +42,10 @@ def refresh_vectorstore():
     )
     chunks = text_splitter.split_documents(documents)
     print(f"📌 Total document chunks created: {len(chunks)}")
-
-    # Extract texts from chunks
-    texts = [doc.page_content for doc in chunks]
     
-    # Get embeddings using Groq
-    embeddings_list = get_embeddings(texts)
-    
-    # Create FAISS index
-    dimension = len(embeddings_list[0])
-    import faiss
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings_list)
-    
-    # Create FAISS database
-    faiss_db_local = FAISS(
-        embeddings=OpenAIEmbeddings(
-            openai_api_key=groq_api_key,
-            openai_api_base="https://api.groq.com/openai/v1",
-            model="text-embedding-ada-002",
-            headers={"Authorization": f"Bearer {groq_api_key}"}
-        ),
-        index=index,
-        docstore=chunks
-    )
+    # Create embeddings using Nomic AI
+    embeddings = HuggingFaceEmbeddings(model_name="nomic-ai/nomic-embed-text-v1.5")
+    faiss_db_local = FAISS.from_documents(chunks, embeddings)
 
     # Save FAISS index
     if not os.path.exists("vectorstore"):
@@ -179,12 +129,7 @@ def cleanup_pdf(pdf_path):
 if os.path.exists("vectorstore/db_faiss"):
     print("📥 Loading existing FAISS index...")
     try:
-        embeddings = OpenAIEmbeddings(
-            openai_api_key=groq_api_key,
-            openai_api_base="https://api.groq.com/openai/v1",
-            model="text-embedding-ada-002",
-            headers={"Authorization": f"Bearer {groq_api_key}"}
-        )
+        embeddings = HuggingFaceEmbeddings(model_name="nomic-ai/nomic-embed-text-v1.5")
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
             embeddings,
@@ -200,61 +145,3 @@ if os.path.exists("vectorstore/db_faiss"):
 else:
     print("🚀 No FAISS index found. Creating a new one...")
     faiss_db = refresh_vectorstore()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # vector_database.py
-# from langchain_text_splitters import RecursiveCharacterTextSplitter
-# from langchain_ollama import OllamaEmbeddings
-# from langchain_community.vectorstores import FAISS
-# from langchain_community.document_loaders import PyPDFLoader
-# import os
-
-# # New PDF Processor
-# def process_uploaded_pdf(uploaded_file):
-#     # Save to pdfs/ directory
-#     if not os.path.exists("pdfs"):
-#         os.makedirs("pdfs")
-#     file_path = f"pdfs/{uploaded_file.name}"
-#     with open(file_path, "wb") as f:
-#         f.write(uploaded_file.getbuffer())
-#     return file_path
-
-# # Updated VectorDB Builder
-# def refresh_vectorstore():
-#     # Load all PDFs
-#     loaders = [PyPDFLoader(f"pdfs/{f}") for f in os.listdir("pdfs") if f.endswith(".pdf")]
-#     documents = []
-#     for loader in loaders:
-#         documents.extend(loader.load())
-    
-#     # Create chunks using a recursive text splitter
-#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-#     chunks = text_splitter.split_documents(documents)
-    
-#     # Create embeddings
-#     embeddings = OllamaEmbeddings(model="deepseek-r1:1.5b")
-#     faiss_db_local = FAISS.from_documents(chunks, embeddings)
-#     faiss_db_local.save_local("vectorstore/db_faiss")
-#     return faiss_db_local
-
-# # Initialize DB
-# if os.path.exists("vectorstore/db_faiss"):
-#     faiss_db = FAISS.load_local("vectorstore/db_faiss", 
-#                                 OllamaEmbeddings(model="deepseek-r1:1.5b"),
-#                                 allow_dangerous_deserialization=True)
-# else:
-#     faiss_db = refresh_vectorstore()
