@@ -22,9 +22,16 @@ openai.api_base = "https://api.groq.com/openai/v1"
 def get_embeddings(texts):
     """Get embeddings for a list of texts using Groq API."""
     try:
+        # Create headers with Groq API key
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}"
+        }
+        
+        # Make request to Groq API
         response = openai.embeddings.create(
             model="text-embedding-ada-002",
-            input=texts
+            input=texts,
+            headers=headers
         )
         return [data.embedding for data in response.data]
     except Exception as e:
@@ -83,7 +90,8 @@ def refresh_vectorstore():
         embeddings=OpenAIEmbeddings(
             openai_api_key=groq_api_key,
             openai_api_base="https://api.groq.com/openai/v1",
-            model="text-embedding-ada-002"
+            model="text-embedding-ada-002",
+            headers={"Authorization": f"Bearer {groq_api_key}"}
         ),
         index=index,
         docstore=chunks
@@ -174,7 +182,8 @@ if os.path.exists("vectorstore/db_faiss"):
         embeddings = OpenAIEmbeddings(
             openai_api_key=groq_api_key,
             openai_api_base="https://api.groq.com/openai/v1",
-            model="text-embedding-ada-002"
+            model="text-embedding-ada-002",
+            headers={"Authorization": f"Bearer {groq_api_key}"}
         )
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
