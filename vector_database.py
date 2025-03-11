@@ -4,6 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
+import tiktoken
 
 # Load environment variables
 load_dotenv()
@@ -39,14 +40,22 @@ def refresh_vectorstore():
     print(f"📄 Loaded {len(documents)} pages from PDFs.")
 
     # Split text
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len,
+        is_separator_regex=False
+    )
     chunks = text_splitter.split_documents(documents)
     print(f"📌 Total document chunks created: {len(chunks)}")
 
     # Create embeddings using OpenAI compatible API
     embeddings = OpenAIEmbeddings(
         openai_api_key=groq_api_key,
-        openai_api_base="https://api.groq.com/openai/v1"
+        openai_api_base="https://api.groq.com/openai/v1",
+        model="text-embedding-ada-002",  # Specify the embedding model
+        tiktoken_model_name="text-embedding-ada-002",  # Specify tokenizer
+        chunk_size=1000  # Process in smaller batches
     )
     
     faiss_db_local = FAISS.from_documents(chunks, embeddings)
@@ -135,7 +144,10 @@ if os.path.exists("vectorstore/db_faiss"):
     try:
         embeddings = OpenAIEmbeddings(
             openai_api_key=groq_api_key,
-            openai_api_base="https://api.groq.com/openai/v1"
+            openai_api_base="https://api.groq.com/openai/v1",
+            model="text-embedding-ada-002",
+            tiktoken_model_name="text-embedding-ada-002",
+            chunk_size=1000
         )
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
