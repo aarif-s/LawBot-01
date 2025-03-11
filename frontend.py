@@ -27,7 +27,7 @@ atexit.register(cleanup_on_exit)
 
 # ============= Page Configuration =============
 st.set_page_config(
-    page_title="LawGeni Sonu",
+    page_title="LawAi Sonu",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -45,7 +45,7 @@ st.markdown("""
     
     /* Title styling */
     .stTitle {
-        font-size: 1.1rem !important;
+        font-size: 1.0rem ;
         margin: 0.3rem 0 !important;
     }
     
@@ -113,7 +113,7 @@ st.markdown("""
 # ============= Main Application =============
 with st.container():
     # Title
-    st.title("⚖️ LawGeni Sonu")
+    st.title("⚖️ LawAi Sonu")
     
     # Status Bar
     status_col1, status_col2 = st.columns([3, 1])
