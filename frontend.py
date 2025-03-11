@@ -27,7 +27,7 @@ atexit.register(cleanup_on_exit)
 
 # ============= Page Configuration =============
 st.set_page_config(
-    page_title="LawGenie Sonu",
+    page_title="LawGeni Sonu",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -45,7 +45,7 @@ st.markdown("""
     
     /* Title styling */
     .stTitle {
-        font-size: 1.2rem !important;
+        font-size: 1.1rem !important;
         margin: 0.3rem 0 !important;
     }
     
