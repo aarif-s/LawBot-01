@@ -106,10 +106,7 @@ st.markdown("""
         .stChatMessage {
             padding: 0.6rem;
         }
-        .stChatInputContainer {
-        max-width: 1800px;
-        margin: 0 auto;
-        }
+         
     }
 </style>
 """, unsafe_allow_html=True)
