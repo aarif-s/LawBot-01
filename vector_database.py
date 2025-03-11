@@ -16,7 +16,7 @@ if not groq_api_key:
 
 # Configure OpenAI client for Groq
 openai.api_key = groq_api_key
-openai.api_base = "https://api.groq.com/openai/v1"
+openai.base_url = "https://api.groq.com/v1"
 
 def get_embeddings(texts):
     """Get embeddings for a list of texts using Groq API."""
