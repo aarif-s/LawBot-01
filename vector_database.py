@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_groq import GroqEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
+import openai
+import numpy as np
 
 # Load environment variables
 load_dotenv()
@@ -12,6 +13,22 @@ load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
 if not groq_api_key:
     raise ValueError("Please set GROQ_API_KEY environment variable")
+
+# Configure OpenAI client for Groq
+openai.api_key = groq_api_key
+openai.api_base = "https://api.groq.com/openai/v1"
+
+def get_embeddings(texts):
+    """Get embeddings for a list of texts using Groq API."""
+    try:
+        response = openai.embeddings.create(
+            model="text-embedding-ada-002",
+            input=texts
+        )
+        return [data.embedding for data in response.data]
+    except Exception as e:
+        print(f"Error getting embeddings: {e}")
+        raise
 
 def process_uploaded_pdf(uploaded_file):
     """Save uploaded PDF and return its path."""
@@ -48,12 +65,29 @@ def refresh_vectorstore():
     chunks = text_splitter.split_documents(documents)
     print(f"📌 Total document chunks created: {len(chunks)}")
     
-    # Create embeddings using Groq
-    embeddings = GroqEmbeddings(
-        groq_api_key=groq_api_key,
-        model_name="llama2-70b-4096"
+    # Get embeddings using Groq
+    texts = [doc.page_content for doc in chunks]
+    embeddings_list = get_embeddings(texts)
+    
+    # Create FAISS index
+    dimension = len(embeddings_list[0])
+    import faiss
+    index = faiss.IndexFlatL2(dimension)
+    index.add(np.array(embeddings_list))
+    
+    # Create FAISS database
+    class GroqEmbeddings:
+        def embed_documents(self, texts):
+            return get_embeddings(texts)
+        
+        def embed_query(self, text):
+            return get_embeddings([text])[0]
+
+    faiss_db_local = FAISS(
+        embeddings=GroqEmbeddings(),
+        index=index,
+        docstore=chunks
     )
-    faiss_db_local = FAISS.from_documents(chunks, embeddings)
 
     # Save FAISS index
     if not os.path.exists("vectorstore"):
@@ -137,13 +171,16 @@ def cleanup_pdf(pdf_path):
 if os.path.exists("vectorstore/db_faiss"):
     print("📥 Loading existing FAISS index...")
     try:
-        embeddings = GroqEmbeddings(
-            groq_api_key=groq_api_key,
-            model_name="llama2-70b-4096"
-        )
+        class GroqEmbeddings:
+            def embed_documents(self, texts):
+                return get_embeddings(texts)
+            
+            def embed_query(self, text):
+                return get_embeddings([text])[0]
+
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
-            embeddings,
+            GroqEmbeddings(),
             allow_dangerous_deserialization=True
         )
         print("✅ Loaded existing FAISS index...")
