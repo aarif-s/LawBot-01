@@ -1,10 +1,11 @@
 import os
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 import tiktoken
+import openai
 
 # Load environment variables
 load_dotenv()
@@ -13,6 +14,22 @@ load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
 if not groq_api_key:
     raise ValueError("Please set GROQ_API_KEY environment variable")
+
+# Configure OpenAI client for Groq
+openai.api_key = groq_api_key
+openai.api_base = "https://api.groq.com/openai/v1"
+
+def get_embeddings(texts):
+    """Get embeddings for a list of texts using Groq API."""
+    try:
+        response = openai.embeddings.create(
+            model="text-embedding-ada-002",
+            input=texts
+        )
+        return [data.embedding for data in response.data]
+    except Exception as e:
+        print(f"Error getting embeddings: {e}")
+        raise
 
 def process_uploaded_pdf(uploaded_file):
     """Save uploaded PDF and return its path."""
@@ -49,16 +66,28 @@ def refresh_vectorstore():
     chunks = text_splitter.split_documents(documents)
     print(f"📌 Total document chunks created: {len(chunks)}")
 
-    # Create embeddings using OpenAI compatible API
-    embeddings = OpenAIEmbeddings(
-        openai_api_key=groq_api_key,
-        openai_api_base="https://api.groq.com/openai/v1",
-        model="text-embedding-ada-002",  # Specify the embedding model
-        tiktoken_model_name="text-embedding-ada-002",  # Specify tokenizer
-        chunk_size=1000  # Process in smaller batches
-    )
+    # Extract texts from chunks
+    texts = [doc.page_content for doc in chunks]
     
-    faiss_db_local = FAISS.from_documents(chunks, embeddings)
+    # Get embeddings using Groq
+    embeddings_list = get_embeddings(texts)
+    
+    # Create FAISS index
+    dimension = len(embeddings_list[0])
+    import faiss
+    index = faiss.IndexFlatL2(dimension)
+    index.add(embeddings_list)
+    
+    # Create FAISS database
+    faiss_db_local = FAISS(
+        embeddings=OpenAIEmbeddings(
+            openai_api_key=groq_api_key,
+            openai_api_base="https://api.groq.com/openai/v1",
+            model="text-embedding-ada-002"
+        ),
+        index=index,
+        docstore=chunks
+    )
 
     # Save FAISS index
     if not os.path.exists("vectorstore"):
@@ -145,9 +174,7 @@ if os.path.exists("vectorstore/db_faiss"):
         embeddings = OpenAIEmbeddings(
             openai_api_key=groq_api_key,
             openai_api_base="https://api.groq.com/openai/v1",
-            model="text-embedding-ada-002",
-            tiktoken_model_name="text-embedding-ada-002",
-            chunk_size=1000
+            model="text-embedding-ada-002"
         )
         faiss_db = FAISS.load_local(
             "vectorstore/db_faiss",
