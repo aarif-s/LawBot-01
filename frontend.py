@@ -77,7 +77,7 @@ st.markdown("""
         z-index: 1000;
     }
     .stChatInputContainer {
-        max-width: 1600px;
+        max-width: 1200px;
         margin: 0 auto;
     }
     
@@ -105,6 +105,10 @@ st.markdown("""
         }
         .stChatMessage {
             padding: 0.6rem;
+        }
+        .stChatInputContainer {
+        max-width: 1200px;
+        margin: 0 auto;
         }
     }
 </style>
