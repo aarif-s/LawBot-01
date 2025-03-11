@@ -107,7 +107,7 @@ st.markdown("""
             padding: 0.6rem;
         }
         .stChatInputContainer {
-        max-width: 1200px;
+        max-width: 1800px;
         margin: 0 auto;
         }
     }
