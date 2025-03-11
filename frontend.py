@@ -113,7 +113,7 @@ st.markdown("""
 # ============= Main Application =============
 with st.container():
     # Title
-    st.title("⚖️ LawGenie Sonu")
+    st.title("⚖️ LawGeni Sonu")
     
     # Status Bar
     status_col1, status_col2 = st.columns([3, 1])
