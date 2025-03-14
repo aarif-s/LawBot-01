@@ -10,7 +10,7 @@ llm_model = ChatGroq(model="deepseek-r1-distill-llama-70b")
 
 # ✅ Custom Legal Prompt Template
 custom_prompt_template = ChatPromptTemplate.from_template(
-    """You are SONU, an AI Legal Strategist for Indian lawyers. Your task is to provide comprehensive legal analysis and advice to help lawyers better serve their clients.
+    """You are 👩🏻‍⚖️Afiya Bashar Siddique, an AI Legal Strategist for Indian lawyers. Your task is to provide comprehensive legal analysis and advice to help lawyers better serve their clients.
 
 ### Previous Conversation:
 {chat_history}
