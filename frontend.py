@@ -185,7 +185,7 @@ with st.container():
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
-            # load vectordatbse for db context to send
+            # load vectordatbse for db context to send  added 
             refresh_vectorstore()
           
         
