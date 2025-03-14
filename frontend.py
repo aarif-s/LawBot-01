@@ -124,11 +124,11 @@ with st.container():
         else:
             st.info("💡 Upload a PDF or ask general legal questions")
     
-    # with status_col2:
-    #     if st.session_state.pdf_processed:
-    #         st.success("✅ PDF Ready")
-    #     else:
-    #         st.warning("⚠️ No PDF")
+    with status_col2:
+        if st.session_state.pdf_processed:
+            st.success("✅ PDF Ready")
+        else:
+            st.warning("⚠️ No PDF")
 
     # PDF Upload Section
     uploaded_file = st.file_uploader(
