@@ -124,11 +124,11 @@ with st.container():
         else:
             st.info("💡 Upload a PDF or ask general legal questions")
     
-    with status_col2:
-        if st.session_state.pdf_processed:
-            st.success("✅ PDF Ready")
-        else:
-            st.warning("⚠️ No PDF")
+    # with status_col2:
+    #     if st.session_state.pdf_processed:
+    #         st.success("✅ PDF Ready")
+    #     else:
+    #         st.warning("⚠️ No PDF")
 
     # PDF Upload Section
     uploaded_file = st.file_uploader(
@@ -185,8 +185,10 @@ with st.container():
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
-           
-          
+            # ----------------------------------MOST CHECK CHANGED ---------------------------------------
+            refresh_vectorstore()
+            # ----------------------------------MOST CHECK CHANGED ---------------------------------------
+            
         
 
         # Generate and display response
@@ -227,7 +229,7 @@ with st.container():
     st.markdown('</div></div>', unsafe_allow_html=True)
 
     # Footer
-    st.markdown('<div class="footer-divider">---</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer-divider">-</div>', unsafe_allow_html=True)
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.8rem;'>
         ⚖️ Legal Q&A | AI Powered
