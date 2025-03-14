@@ -124,12 +124,6 @@ with st.container():
         else:
             st.info("💡 Upload a PDF or ask general legal questions")
     
-    # with status_col2:
-    #     if st.session_state.pdf_processed:
-    #         st.success("✅ PDF Ready")
-    #     else:
-    #         st.warning("⚠️ No PDF")
-
     # PDF Upload Section
     uploaded_file = st.file_uploader(
         "📄 Upload PDF (Optional)", 
@@ -189,14 +183,13 @@ with st.container():
             refresh_vectorstore()
             # ----------------------------------MOST CHECK CHANGED ---------------------------------------
             
-        
-
         # Generate and display response
         with st.chat_message("assistant"):
             with st.spinner("⚖️ Analyzing..."):
                 try:
-                    # Get relevant documents if PDF is processed
-                    retrieved_docs = retrieve_docs(prompt) if st.session_state.pdf_processed else []
+                    # ALWAYS retrieve relevant documents from vector database (if available)
+                    retrieved_docs = retrieve_docs(prompt)
+                    has_document = True if retrieved_docs else False  # Modified check
                     
                     # Get chat history
                     chat_history = "\n".join(
@@ -207,7 +200,7 @@ with st.container():
                     response = answer_query(
                         query=prompt,
                         chat_history=chat_history,
-                        has_document=st.session_state.pdf_processed
+                        has_document=has_document  # Modified to use our new flag
                     )
 
                     # Display response with typing effect
